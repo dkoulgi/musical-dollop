@@ -76,7 +76,7 @@ void* tester(void* fd)
 	sleep(1);
 
 	set = read_key(fptr, object->key);      		//call to give input key to the read function
-	if ((set = read(fptr, &buf, sizeof(int))) == -1){	//driver read
+	if ((set = read(fptr, &buf, sizeof(int))) < 0){	//driver read
 		printf("Failed to read data.\n");
 	}
 	else{

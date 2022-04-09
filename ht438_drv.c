@@ -1,21 +1,20 @@
 /* Basic driver example to show skelton methods for several file operations.
- references: http://lxr.free-electrons.com/source/tools/include/linux/list.h#L713
- ----------------------------------------------------------------------------------------------------------------*/
+----------------------------------------------------------------------*/
 
 #include <linux/module.h>
+#include <linux/moduleparam.h>
 #include <linux/kernel.h>
-#include <linux/fs.h>
 #include <linux/cdev.h>
-#include <linux/types.h>
-#include <linux/slab.h>
+#include <linux/fs.h>
 #include <asm/uaccess.h>
+#include <linux/slab.h>
+#include <linux/types.h>
 #include <linux/string.h>
-#include <linux/device.h>
 #include <linux/jiffies.h>
+#include <linux/device.h>
+#include <linux/hashtable.h>
 #include <linux/errno.h>
 #include <linux/init.h>
-#include <linux/moduleparam.h>
-#include <linux/hashtable.h>
 #include "ht438_ioctl.h"
 
 #define DEVICE_NAME                 "ht438_dev"  // device names of the hashtables
@@ -126,7 +125,7 @@ ssize_t ht_driver_write(struct file* file, const char* buf,
  * Read to ht438 driver
  */
 ssize_t ht_driver_read(struct file* file, char* buf,
-	size_t count, loff_t* ppos)   //assumimg we know the key that is stored in read_key (a global variable)
+	size_t count, loff_t* ppos)   //key stored in read_key
 {
 	int kbuf;
 	int dataSize = 0;
@@ -200,7 +199,7 @@ long ht_driver_ioctl(struct file* file, unsigned int ioctl_num, unsigned long io
 			}
 		}
 		((dump_argp)iobufp)->in.n = count;
-		if (copy_to_user((unsigned long*)(ioctl_param), (unsigned long*)iobufp, _IOC_SIZE(ioctl_num)))
+		if (copy_to_user((unsigned long*)(ioctl_param), (unsigned long*)iobufp, _IOC_SIZE(ioctl_num))) //access user space mem
 		{
 			printk(" in dump_ioctl unable to copy data to user space\n");
 			kfree(iobufp);
@@ -274,14 +273,15 @@ int __init ht_driver_init(void)
 		return ret;
 	}
 
-	/* Send uevents to udev, so it'll create /dev nodes */
+	/* Send uevents to udev, create /dev nodes */
 	ht_dev_device = device_create(ht_dev_class, NULL, MKDEV(MAJOR(ht_dev_number), 0), NULL, DEVICE_NAME);
-	time_since_boot = (jiffies - INITIAL_JIFFIES) / HZ;//since on some systems jiffies is a very huge uninitialized value at boot and saved.
+	time_since_boot = (jiffies - INITIAL_JIFFIES) / HZ; //lesser system jiffies.
 
 	printk("ht438 driver initialized.\n");
 
 	return 0;
 }
+
 /* Driver Exit */
 void __exit ht_driver_exit(void)
 {
@@ -290,7 +290,7 @@ void __exit ht_driver_exit(void)
 	hash_for_each(ht438_tbl, kbuf, temp, next) {
 		hash_del(&temp->next);
 	}
-	unregister_chrdev_region((ht_dev_number), 1);
+	unregister_chrdev_region((ht_dev_number), 1); //empty hashtable
 
 	/* Destroy device */
 	device_destroy(ht_dev_class, MKDEV(MAJOR(ht_dev_number), 0));
