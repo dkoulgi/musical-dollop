@@ -1,0 +1,35 @@
+*-------------------------------------
+README: CSE 438 Assignment3
+AUTHOR: Dhruv Koulgi
+ASU ID: 1215574243
+*-------------------------------------
+
+***HOW TO MAKE***
+-----------------
+1) driver program: ht438_drv.c
+
+This program handles all the driver functions: open, read, write,
+ioctl/dump, release. It also initializes and exits from the kernel
+module. Responsible for all kernel level activity.
+
+2) test program: assignment3.c
+
+This program handles the file input and pthreads. It scans files
+for commands for driver function to use. Responsible for all user
+level activity.
+
+3) header files: ht438_ioctl.h, ht_object.h
+
+The first header file is for the definition of ioctl to include
+dump args command. The second header file is the definition for
+objects being hashed.
+
+***HOW TO USE***
+----------------
+1) make all
+2) sudo insmod ht438_drv.ko
+3) output from drivers
+4) sudo rmmmod ht438_drv.ko
+5) make clean
+
+
